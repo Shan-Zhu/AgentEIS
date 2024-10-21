@@ -56,9 +56,9 @@ def LLM_analysis(input_text):
     history_text = "\n".join(conversation_history)
     combined_input = f"{history_text}\nUser: {input_text}"
 
-    # llm = ChatOllama(model="llama3.1", temperature=0.7)
-    # llm = ChatOllama(model="llama3.2:1b", temperature=0.7)
-    llm = ChatOllama(model="qwen2.5:0.5b", temperature=0.7)
+    llm = ChatOllama(model="llama3.1", temperature=0.7)
+    llm = ChatOllama(model="llama3.2:1b", temperature=0.7)
+    # llm = ChatOllama(model="qwen2.5:0.5b", temperature=0.7)
     response = llm.invoke(combined_input)
 
     # Extract the actual response from the model
@@ -89,21 +89,21 @@ class Application(tk.Tk):
         self.tavily_api_label.grid(row=0, column=0, sticky='e')
         self.tavily_api_entry = tk.Entry(self, width=50)
         self.tavily_api_entry.grid(row=0, column=1, columnspan=2)
-        self.tavily_api_entry.insert(0, "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")  # 设置默认密钥
+        self.tavily_api_entry.insert(0, "...")  # your Tavily API
 
         # LangSmith API
         self.api_label = tk.Label(self, text="LangSmith API:")
         self.api_label.grid(row=1, column=0, sticky='e')
         self.api_entry = tk.Entry(self, width=50)
         self.api_entry.grid(row=1, column=1, columnspan=2)
-        self.api_entry.insert(0, "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")  # 设置默认密钥
+        self.api_entry.insert(0, "...")  #  your API key for LangSmith
 
         # Input text
         self.input_label = tk.Label(self, text="Input:")
         self.input_label.grid(row=2, column=0, sticky='ne')
         self.input_text = scrolledtext.ScrolledText(self, width=50, height=10)
         self.input_text.grid(row=2, column=1, columnspan=2)
-        self.input_text.insert(tk.END, self.circuit_string)  # 将circuit_string设置为默认输入内容
+        self.input_text.insert(tk.END, self.circuit_string)  
 
         # Output text
         self.output_label = tk.Label(self, text="Output:")
@@ -115,16 +115,15 @@ class Application(tk.Tk):
         self.run_search_button = tk.Button(self, text="Run Web Search", command=self.run_search)
         self.run_search_button.grid(row=4, column=1, sticky='e')
 
-        # 创建显示对话历史的按钮
         self.history_button = tk.Button(self, text="Show Conversation History", command=self.show_conversation_history)
         self.history_button.grid(row=4, column=2, sticky='w')
 
     def run_search(self):
-        default_tavily_api_key = "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"
+        default_tavily_api_key = "..."  # your Tavily API
         tavily_api_key = self.tavily_api_entry.get().strip() or default_tavily_api_key
         os.environ["TAVILY_API_KEY"] = tavily_api_key
 
-        default_langsmith_api_key = "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"
+        default_langsmith_api_key = "..." #  your API key for LangSmith
         langsmith_api_key = self.api_entry.get().strip() or default_langsmith_api_key
         os.environ["LANGCHAIN_API_KEY"] = langsmith_api_key
 
@@ -135,12 +134,10 @@ class Application(tk.Tk):
 
         output_data = LLM_analysis(input_text)
 
-        # 更新输出文本框，只显示最新的对话内容
         self.output_text.delete("1.0", tk.END)
         latest_conversation = f"User: {input_text}\nLLM: {output_data}"
         self.output_text.insert(tk.END, latest_conversation)
 
-        # 清空输入框
         self.input_text.delete("1.0", tk.END)
 
     def show_conversation_history(self):
@@ -152,7 +149,7 @@ class Application(tk.Tk):
 
         full_conversation = "\n".join(conversation_history)
         history_text.insert(tk.END, full_conversation)
-        history_text.config(state=tk.DISABLED)  # 禁用编辑
+        history_text.config(state=tk.DISABLED)  
 
 
 if __name__ == "__main__":
