@@ -16,7 +16,6 @@ from langchain_community.vectorstores import FAISS
 from langchain.tools.retriever import create_retriever_tool
 from langchain_core.tools import Tool
 
-# 定义对话历史变量
 conversation_history = []
 
 
@@ -105,9 +104,9 @@ def RAG_analysis(input_text, history, folder_path):
     local_search = create_retriever_tool_from_vector(vector)
     tools = [local_search]
 
-    # model = ChatOllama(model="llama3.1", temperature=0.7)
+    model = ChatOllama(model="llama3.1", temperature=0.7)
     # model = ChatOllama(model="llama3.2:1b", temperature=0.7)
-    model = ChatOllama(model="qwen2.5:0.5b", temperature=0.7)
+    # model = ChatOllama(model="qwen2.5:0.5b", temperature=0.7)
 
     prompt = hub.pull("hwchase17/openai-functions-agent")
     agent_executor = create_agent_executor(model, tools, prompt)
@@ -136,7 +135,7 @@ class Application(tk.Tk):
         self.api_label.grid(row=0, column=0, sticky='e')
         self.api_entry = tk.Entry(self, width=50)
         self.api_entry.grid(row=0, column=1, columnspan=2)
-        self.api_entry.insert(0, "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")  # 设置默认密钥
+        self.api_entry.insert(0, "...")  # your API key for LangSmith
 
         # Folder path for PDFs
         self.pdf_folder_label = tk.Label(self, text="PDF Folder Path:")
@@ -159,7 +158,7 @@ class Application(tk.Tk):
         self.load_vector_store_label.grid(row=3, column=0, sticky='e')
         self.load_vector_store_entry = tk.Entry(self, width=50)
         self.load_vector_store_entry.grid(row=3, column=1)
-        self.load_vector_store_entry.insert(0, "D:/AgentEIS/EIS_Paper50_OA-vector/FAISS.db")  # 设置默认路径
+        self.load_vector_store_entry.insert(0, "...\FAISS.db")  # your path for save FAISS.db
         self.load_vector_store_button = tk.Button(self, text="Browse", command=self.browse_load_vector_store)
         self.load_vector_store_button.grid(row=3, column=2)
 
@@ -168,7 +167,7 @@ class Application(tk.Tk):
         self.input_label.grid(row=4, column=0, sticky='ne')
         self.input_text = scrolledtext.ScrolledText(self, width=50, height=10)
         self.input_text.grid(row=4, column=1, columnspan=2)
-        self.input_text.insert(tk.END, self.circuit_string)  # 将circuit_string设置为默认输入内容
+        self.input_text.insert(tk.END, self.circuit_string) 
 
         # Output text
         self.output_label = tk.Label(self, text="Output:")
@@ -183,7 +182,6 @@ class Application(tk.Tk):
         self.run_analysis_button = tk.Button(self, text="Run RAG Analysis", command=self.run_analysis)
         self.run_analysis_button.grid(row=6, column=2, sticky='w')
 
-        # 创建显示对话历史的按钮
         self.history_button = tk.Button(self, text="Show Conversation History", command=self.show_conversation_history)
         self.history_button.grid(row=7, column=1, sticky='e')
 
@@ -206,7 +204,7 @@ class Application(tk.Tk):
             self.load_vector_store_entry.insert(0, folder_path)
 
     def create_vector_store(self):
-        api_key = self.api_entry.get().strip() or "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"
+        api_key = self.api_entry.get().strip() or "..." # your API key for LangSmith
         os.environ["LANGCHAIN_API_KEY"] = api_key
 
         folder_path = self.pdf_folder_entry.get()
@@ -218,7 +216,7 @@ class Application(tk.Tk):
         messagebox.showinfo("Success", "Vector store created successfully.")
 
     def run_analysis(self):
-        default_api_key = "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"
+        default_api_key = "..."  # your API key for LangSmith
         api_key = self.api_entry.get().strip() or default_api_key
         os.environ["LANGCHAIN_API_KEY"] = api_key
 
@@ -227,7 +225,6 @@ class Application(tk.Tk):
             messagebox.showerror("Error", "Please enter input text for the search.")
             return
 
-        # 获取load_vector_store_entry的值
         load_vector_store_path = self.load_vector_store_entry.get().strip()
         if not load_vector_store_path:
             messagebox.showerror("Error", "Please specify the path for loading the vector store.")
@@ -235,16 +232,13 @@ class Application(tk.Tk):
 
         output_data = RAG_analysis(input_text, conversation_history, load_vector_store_path)
 
-        # 更新输出文本框，只显示最新的对话内容
         self.output_text.delete("1.0", tk.END)
         latest_conversation = f"User: {input_text}\nLLM: {output_data}"
         self.output_text.insert(tk.END, latest_conversation)
 
-        # 记录用户输入和LLM输出到对话历史中
         conversation_history.append(f"User: {input_text}")
         conversation_history.append(f"LLM: {output_data}")
 
-        # 清空输入框
         self.input_text.delete("1.0", tk.END)
 
     def show_conversation_history(self):
@@ -256,7 +250,7 @@ class Application(tk.Tk):
 
         full_conversation = "\n".join(conversation_history)
         history_text.insert(tk.END, full_conversation)
-        history_text.config(state=tk.DISABLED)  # 禁用编辑
+        history_text.config(state=tk.DISABLED) 
 
 if __name__ == "__main__":
     import sys
