@@ -1,5 +1,5 @@
 # AgentEIS
-The code for AgentEIS, which is an AI-enpowered EIS anlysis system.
+The code for AgentEIS, which is an AI-enpowered EIS anlysis system, reported by the article name "AI-Empowered Analysis of Equivalent Circuits in Electrochemical Impedance Spectroscopy".
 
 How to use:
 1. Download all code into a single folder.
