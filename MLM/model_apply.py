@@ -5,27 +5,15 @@ from peft import PeftModel, LoraConfig, TaskType
 
 prompt = "You are an expert in the field of electrochemistry and need to conduct impedance equivalent circuit analysis. What is the equivalent circuit of this EIS?"
 local_model_path = "./Qwen/Qwen2___5-VL-3B-Instruct"
-lora_model_path = "./output/Qwen2___5-VL-7B-EIS/checkpoint-33"
 
 test_folder = "./EIS_dataset_test"
 supported_ext = ['.jpg', '.jpeg', '.png', '.bmp']  
-
-config = LoraConfig(
-    task_type=TaskType.CAUSAL_LM,
-    target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
-    inference_mode=True,
-    r=4,  
-    lora_alpha=16,  
-    lora_dropout=0.05, 
-    bias="none",
-)
 
 # default: Load the model on the available device(s)
 model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
     local_model_path, torch_dtype="auto", device_map="auto"
 )
 
-model = PeftModel.from_pretrained(model, model_id=f"{lora_model_path}", config=config)
 processor = AutoProcessor.from_pretrained(local_model_path)
 
 for filename in os.listdir(test_folder):
