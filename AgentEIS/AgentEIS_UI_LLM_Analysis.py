@@ -10,15 +10,8 @@ def LLM_analysis(input_text):
     history_text = "\n".join(conversation_history)
     combined_input = f"{history_text}\nUser: {input_text}"
     
-    llm = ChatOllama(model="llama3.1", temperature=0.7)
-    # llm = ChatOllama(model="llama3.2", temperature=0.7)
-    # llm = ChatOllama(model="llama3.2:1b", temperature=0.7)
-    # llm = ChatOllama(model="qwen2.5:7b", temperature=0.7)
-    # llm = ChatOllama(model="qwen2.5:3b", temperature=0.7)
-    # llm = ChatOllama(model="qwen2.5:1.5b", temperature=0.7)
-    # llm = ChatOllama(model="qwen2.5:0.5b", temperature=0.7)
-    # llm = ChatOllama(model="gemma2:9b", temperature=0.7)
-    # llm = ChatOllama(model="gemma2:2b", temperature=0.7)
+    llm = ChatOllama(model="llama3.2", temperature=0.7)
+    # llm = ChatOllama(model="qwen3:8b", temperature=0.7)
     response = llm.invoke(combined_input)
 
     output = response['message']['content'] if 'message' in response and 'content' in response['message'] else str(
