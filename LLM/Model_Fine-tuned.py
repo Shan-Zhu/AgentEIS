@@ -9,18 +9,13 @@ from transformers import AutoModelForCausalLM, TrainingArguments, Trainer, DataC
 import os
 import swanlab
 
-swanlab.login(api_key="Gsky84PhoA8DzRhAQx30p")
+swanlab.login(api_key="...")
 
 def dataset_jsonl_transfer(origin_path, new_path):
-    """
-    将原始数据集转换为大模型微调所需数据格式的新数据集
-    """
     messages = []
 
-    # 读取旧的JSONL文件
     with open(origin_path, "r") as file:
         for line in file:
-            # 解析每一行的json数据
             data = json.loads(line)
             context = data["text"]
             catagory = data["category"]
@@ -32,16 +27,12 @@ def dataset_jsonl_transfer(origin_path, new_path):
             }
             messages.append(message)
 
-    # 保存重构后的JSONL文件
     with open(new_path, "w", encoding="utf-8") as file:
         for message in messages:
             file.write(json.dumps(message, ensure_ascii=False) + "\n")
             
             
 def process_func(example):
-    """
-    将数据集进行预处理
-    """
     MAX_LENGTH = 10000 
     input_ids, attention_mask, labels = [], [], []
     instruction = tokenizer(
@@ -54,7 +45,7 @@ def process_func(example):
         instruction["attention_mask"] + response["attention_mask"] + [1]
     )
     labels = [-100] * len(instruction["input_ids"]) + response["input_ids"] + [tokenizer.pad_token_id]
-    if len(input_ids) > MAX_LENGTH:  # 做一个截断
+    if len(input_ids) > MAX_LENGTH:  
         input_ids = input_ids[:MAX_LENGTH]
         attention_mask = attention_mask[:MAX_LENGTH]
         labels = labels[:MAX_LENGTH]
@@ -84,17 +75,16 @@ def predict(messages, model, tokenizer):
      
     return response
     
-# 在modelscope上下载Qwen模型到本地目录下
-# model_dir = snapshot_download("./Qwen/Qwen3-0___6B", cache_dir="./", revision="master")
 
-# Transformers加载模型权重
+# model_dir = snapshot_download("./Qwen/Qwen3-8B", cache_dir="./", revision="master")
+
 tokenizer = AutoTokenizer.from_pretrained("./Qwen/Qwen3-8B", use_fast=False, trust_remote_code=True)
 model = AutoModelForCausalLM.from_pretrained("./Qwen/Qwen3-8B", device_map="auto", torch_dtype=torch.bfloat16)
-model.enable_input_require_grads()  # 开启梯度检查点时，要执行该方法
+model.enable_input_require_grads() 
 
-# 加载、处理数据集和测试集
-train_dataset_path = "D:/AgentEIS_4/train.jsonl"
-test_dataset_path = "D:/AgentEIS_4/test.jsonl"
+
+train_dataset_path = ".../train.jsonl"
+test_dataset_path = ".../test.jsonl"
 
 train_jsonl_new_path = "new_train.jsonl"
 test_jsonl_new_path = "new_test.jsonl"
@@ -112,10 +102,10 @@ train_dataset = train_ds.map(process_func, remove_columns=train_ds.column_names)
 config = LoraConfig(
     task_type=TaskType.CAUSAL_LM,
     target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
-    inference_mode=False,  # 训练模式
-    r=4,  # Lora 秩
-    lora_alpha=32,  # Lora alaph，具体作用参见 Lora 原理
-    lora_dropout=0.1,  # Dropout 比例
+    inference_mode=False, 
+    r=4, 
+    lora_alpha=32,  
+    lora_dropout=0.1,  
 )
 
 model = get_peft_model(model, config)
@@ -136,7 +126,7 @@ args = TrainingArguments(
 swanlab_callback = SwanLabCallback(
     project="Qwen3-fintune",
     experiment_name="Qwen3-8B",
-    description="使用通义千问Qwen3-8B模型微调。",
+    description="Qwen3-8B-Finetuned",
     config={
         "model": "Qwen/Qwen3-8B",
         "dataset": "BigEIS",
@@ -153,7 +143,6 @@ trainer = Trainer(
 
 trainer.train()
 
-# 用测试集的前10条，测试模型
 test_df = pd.read_json(test_jsonl_new_path, lines=True)[:3]
 
 test_text_list = []
@@ -173,4 +162,5 @@ for index, row in test_df.iterrows():
     
 swanlab.log({"Prediction": test_text_list})
 swanlab.finish()
+
 
